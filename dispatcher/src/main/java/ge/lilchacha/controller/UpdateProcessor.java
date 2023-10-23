@@ -5,8 +5,10 @@ import ge.lilchacha.utils.MessageUtils;
 import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import static ge.lilchacha.model.RabbitQueue.STICKER_MESSAGE_UPDATE;
 import static ge.lilchacha.model.RabbitQueue.TEXT_MESSAGE_UPDATE;
 
 @Component
@@ -27,7 +29,7 @@ public class UpdateProcessor {
             log.debug("Received update is null");
             return null;
         }
-        if (update != null) {
+        if (update.getMessage() != null) {
             distributeMessageByType(update);
         }else {
             log.error("Received unsupported message type" + update);
@@ -41,9 +43,10 @@ public class UpdateProcessor {
 
     private void distributeMessageByType(Update update) {
         var message = update.getMessage();
+
         if(message.hasText()){
             processTextMesssage(update);
-        }else if(message.hasSticker()){
+        } else if (message.hasSticker()) {
             processStickerMessage(update);
         }else {
             setUnsupportedMessageTypeView(update);
@@ -55,15 +58,17 @@ public class UpdateProcessor {
         setView(sendMessage);
     }
 
-    private void setView(SendMessage sendMessage) {
-        //TODO 1) Надо доделать интеграцию RabbitMQ и проверить ее работу
-        // 2) написать node а конкретно найти модуль который хуярит ответы и заполнить его с командами
-        // 3) заставить бота ответить на сообщение без добавления статусов DATABASE и прочей залупы
-        // 4) прочитать TelegramBOTAPI по теме стикеров + менюшка с командами
+    public void setView(SendMessage sendMessage) {
         telegramBot.sendAnswerMessage(sendMessage);
     }
 
+    public void setViewSticker(SendSticker sticker){
+        telegramBot.sendAnswerStickerMessage(sticker);
+    }
+
+
     private void processStickerMessage(Update update) {
+        updateProducer.produce(STICKER_MESSAGE_UPDATE,update);
     }
 
     private void processTextMesssage(Update update) {

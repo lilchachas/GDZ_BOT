@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramWebhookBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -66,6 +67,17 @@ public class TelegramBot extends TelegramWebhookBot {
             try{
                 if(message!=null){
                     execute(message);
+                }
+            }catch (TelegramApiException e){
+                log.error(e);
+            }
+        }
+    }
+    public void sendAnswerStickerMessage(SendSticker sticker){
+        if(sticker!=null){
+            try{
+                if(sticker!=null){
+                    execute(sticker);
                 }
             }catch (TelegramApiException e){
                 log.error(e);
