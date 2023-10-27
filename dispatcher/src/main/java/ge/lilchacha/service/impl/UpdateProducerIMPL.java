@@ -20,4 +20,16 @@ public class UpdateProducerIMPL implements UpdateProducer {
         log.debug(update.getMessage().getText());
         rabbitTemplate.convertAndSend(rabbitQueue, update);
     }
+
+
+//    public void produce(String rabbitQueue, Update update) {
+//        var message = update.getMessage();
+//        if(message.hasSticker()){
+//            log.debug(update.getMessage().getSticker());
+//        } else if (message.hasText()) {
+//            log.debug(update.getMessage().getText());
+//        }
+//        rabbitTemplate.convertAndSend(rabbitQueue, update);
+//    }
+
 }
