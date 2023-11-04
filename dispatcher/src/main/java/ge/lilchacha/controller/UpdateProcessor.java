@@ -45,7 +45,7 @@ public class UpdateProcessor {
         var message = update.getMessage();
 
         if(message.hasText()){
-            processTextMesssage(update);
+            processTextMessage(update);
         } else if (message.hasSticker()) {
             processStickerMessage(update);
         }else {
@@ -71,7 +71,7 @@ public class UpdateProcessor {
         updateProducer.produce(STICKER_MESSAGE_UPDATE,update);
     }
 
-    private void processTextMesssage(Update update) {
+    private void processTextMessage(Update update) {
         updateProducer.produce(TEXT_MESSAGE_UPDATE,update);
     }
 }

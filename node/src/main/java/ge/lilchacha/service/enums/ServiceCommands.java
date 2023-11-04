@@ -8,6 +8,7 @@ public enum ServiceCommands {
     PAYMENT("/payment"),
     SETTINGS("/settings"),
     GDZ("/gdz"),
+    ACTIVATE("/activate"),
     GPT("/gpt");
 
     private final String value;
