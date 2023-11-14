@@ -1,5 +1,6 @@
 package ge.lilchacha.entity;
 
+import ge.lilchacha.entity.enums.UserMessageStatus;
 import ge.lilchacha.entity.enums.UserView;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -32,4 +33,6 @@ public class AppUser {
     private UserState state;
     @Enumerated(EnumType.STRING)
     private UserView view;// возможные вьюшки
+    @Enumerated(EnumType.STRING)
+    private UserMessageStatus userMessageStatus;
 }
