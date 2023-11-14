@@ -11,7 +11,6 @@ import static ge.lilchacha.entity.enums.UserState.*;
 @Service
 @Log4j
 public class AppUserServiceIMPL implements AppUserService {
-    @Value("${refresh.all.in.seconds}")
     private String refreshNum;
 
     private final AppUserDAO appUserDAO;

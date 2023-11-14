@@ -1,6 +1,7 @@
 package ge.lilchacha.service.impl;
 
 import ge.lilchacha.service.AppUserService;
+import ge.lilchacha.service.InlineCommandAssemblingService;
 import ge.lilchacha.service.MainService;
 import ge.lilchacha.service.ProducerService;
 import ge.lilchacha.service.dao.RawDataDAO;
@@ -15,6 +16,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 import static ge.lilchacha.service.enums.ServiceCommands.*;
 import static ge.lilchacha.entity.enums.UserState.NON_REGISTERED_GOI_STATE;
@@ -30,11 +32,14 @@ public class MainServiceIMPL implements MainService {
     private final AppUserDAO appUserDAO;
     private final AppUserService appUserService;
 
-    public MainServiceIMPL(RawDataDAO rawDataDAO, ProducerService producerService, AppUserDAO appUserDAO, AppUserService appUserService) {
+    private final InlineCommandAssemblingService inlineCommandAssemblingService;
+
+    public MainServiceIMPL(RawDataDAO rawDataDAO, ProducerService producerService, AppUserDAO appUserDAO, AppUserService appUserService, InlineCommandAssemblingService inlineCommandAssemblingService) {
         this.rawDataDAO = rawDataDAO;
         this.producerService = producerService;
         this.appUserDAO = appUserDAO;
         this.appUserService = appUserService;
+        this.inlineCommandAssemblingService = inlineCommandAssemblingService;
     }
 
 
@@ -45,15 +50,31 @@ public class MainServiceIMPL implements MainService {
         var userState = appUser.getState();
         var text = update.getMessage().getText();
         String output = "INTERNAL ERROR 500";
+        InlineKeyboardMarkup keyboard = null;
         var serviceCommand = fromValue(text);
+
+        if(update.hasCallbackQuery()){
+            //TODO СЮДА МЫ ПИХАЕМ КНОПКИ
+        }
         if(serviceCommand.equals(CANCEL)){
             output = cancelProccess(appUser);
         }else {
             output = processServiceCommand(appUser,text);
+            keyboard = processInlineAsk(appUser, text);
         }
 
         var chatID = update.getMessage().getChatId();
-        sendAnswer(output,chatID);
+
+
+        sendAnswer(output, chatID,keyboard);
+    }
+
+    private InlineKeyboardMarkup processInlineAsk(AppUser appUser,String text) {
+        if(START.toString().equals(text)){
+            return inlineCommandAssemblingService.homeMenuInlineBuilder(appUser);
+        }else {
+            return null;
+        }
     }
 
     private AppUser findOrSaveAppUser(Update update) {
@@ -117,11 +138,14 @@ public class MainServiceIMPL implements MainService {
         return "команда отменена";
     }
 
-    private void sendAnswer(String output, Long chatId) {
+    private void sendAnswer(String output, Long chatId, InlineKeyboardMarkup keyboard) {
+        //все работает с этим кодом
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
         sendMessage.setText(output);
+        sendMessage.setReplyMarkup(keyboard);
         producerService.produceAnswer(sendMessage);
+
     }
     private void sendAnswerSticker(Update update) {
 
