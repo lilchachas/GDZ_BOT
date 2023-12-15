@@ -19,6 +19,8 @@ public class RabbitConfiguration {
         return new Queue(TEXT_MESSAGE_UPDATE);
     }
     @Bean
+    public Queue callBackQueue(){ return new Queue(CALLBACK_UPDATE); }
+    @Bean
     public Queue stickerMessageQueue(){
         return new Queue(STICKER_MESSAGE_UPDATE);
     }
@@ -27,12 +29,14 @@ public class RabbitConfiguration {
         return new Queue(ANSWER_MESSAGE);
     }
     @Bean
-    public Queue answerStickerMessageQueue(){
-        return new Queue(ANSWER_GDZ_MESSAGE);
+    public Queue answerInlineQueue(){
+        return new Queue(ANSWER_INLINE_MESSAGE);
     }
     @Bean
-    public Queue answerGDZMessageQueue(){
+    public Queue answerStickerMessageQueue(){
         return new Queue(ANSWER_STICKER_MESSAGE);
     }
+
+
 
 }

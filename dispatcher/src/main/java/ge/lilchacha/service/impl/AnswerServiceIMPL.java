@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 
-import static ge.lilchacha.model.RabbitQueue.ANSWER_MESSAGE;
-import static ge.lilchacha.model.RabbitQueue.ANSWER_STICKER_MESSAGE;
+import static ge.lilchacha.model.RabbitQueue.*;
+
 @Service
 public class AnswerServiceIMPL implements AnswerService {
     private final UpdateProcessor updateProcessor;
@@ -27,5 +27,11 @@ public class AnswerServiceIMPL implements AnswerService {
     @RabbitListener(queues = ANSWER_STICKER_MESSAGE)
     public void consumeSTICKER(SendSticker sticker) {
         updateProcessor.setViewSticker(sticker);
+    }
+
+    @Override
+    @RabbitListener(queues = ANSWER_INLINE_MESSAGE)
+    public void consumeInline(SendMessage message) {
+        updateProcessor.setViewInline(message);
     }
 }

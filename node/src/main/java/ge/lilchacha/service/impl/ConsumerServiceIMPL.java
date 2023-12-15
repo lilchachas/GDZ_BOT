@@ -7,8 +7,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import static ge.lilchacha.model.RabbitQueue.STICKER_MESSAGE_UPDATE;
-import static ge.lilchacha.model.RabbitQueue.TEXT_MESSAGE_UPDATE;
+import static ge.lilchacha.model.RabbitQueue.*;
 
 @Component
 @Log4j
@@ -32,4 +31,12 @@ public class ConsumerServiceIMPL implements ConsumerService {
         log.debug("NODE: STICKER MESSAGE UPDATE RECEIVED");
         mainService.processStickerMessage(update);
     }
+
+    @Override
+    @RabbitListener(queues = CALLBACK_UPDATE)
+    public void consumeCallBack(Update update) {
+        log.debug("NODE: CALLBACK UPDATE RECEIVED");
+        mainService.processCallBack(update);
+    }
+
 }

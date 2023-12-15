@@ -6,8 +6,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 
-import static ge.lilchacha.model.RabbitQueue.ANSWER_MESSAGE;
-import static ge.lilchacha.model.RabbitQueue.ANSWER_STICKER_MESSAGE;
+import static ge.lilchacha.model.RabbitQueue.*;
 
 @Component
 public class ProducerServiceIMPL implements ProducerService {
@@ -25,6 +24,11 @@ public class ProducerServiceIMPL implements ProducerService {
     @Override
     public void produceStickerAnswer(SendSticker sticker) {
         rabbitTemplate.convertAndSend(ANSWER_STICKER_MESSAGE, sticker);
+    }
+
+    @Override
+    public void produceInlineAnswer(SendMessage message) {
+        rabbitTemplate.convertAndSend(ANSWER_INLINE_MESSAGE,message);
     }
 
 

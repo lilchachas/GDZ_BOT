@@ -2,5 +2,5 @@ package ge.lilchacha.entity.enums;
 
 public enum UserMessageStatus {
     BASIC,
-    WAIT_NON_COMMAND_MESSAGE;
+    WAITING_FOR_USER_TEXT;
 }

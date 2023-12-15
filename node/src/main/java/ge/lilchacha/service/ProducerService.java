@@ -6,4 +6,5 @@ import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 public interface ProducerService {
     void produceAnswer(SendMessage message);
     void produceStickerAnswer(SendSticker sticker);
+    void produceInlineAnswer(SendMessage message);
 }

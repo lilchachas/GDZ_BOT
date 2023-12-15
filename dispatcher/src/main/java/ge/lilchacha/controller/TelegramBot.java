@@ -84,5 +84,16 @@ public class TelegramBot extends TelegramWebhookBot {
             }
         }
     }
+    public void sendAnswerInlineMessage(SendMessage message){
+        if(message!=null){
+            try{
+                if(message!=null){
+                    execute(message);
+                }
+            }catch (TelegramApiException e){
+                log.error(e);
+            }
+        }
+    }
 
 }

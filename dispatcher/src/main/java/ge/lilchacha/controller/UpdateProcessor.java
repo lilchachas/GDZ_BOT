@@ -8,8 +8,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import static ge.lilchacha.model.RabbitQueue.STICKER_MESSAGE_UPDATE;
-import static ge.lilchacha.model.RabbitQueue.TEXT_MESSAGE_UPDATE;
+import static ge.lilchacha.model.RabbitQueue.*;
 
 @Component
 @Log4j
@@ -29,13 +28,15 @@ public class UpdateProcessor {
             log.debug("Received update is null");
             return null;
         }
-        if (update.getMessage() != null) {
+        if (update.getMessage() != null || update.getCallbackQuery() !=null) {
             distributeMessageByType(update);
-        }else {
+        } else {
             log.error("Received unsupported message type" + update);
         }
         return null;
     }
+
+
 
     public void registerBot(TelegramBot telegramBot){
         this.telegramBot = telegramBot;
@@ -43,15 +44,28 @@ public class UpdateProcessor {
 
     private void distributeMessageByType(Update update) {
         var message = update.getMessage();
+        var callBack = update.getCallbackQuery();
 
-        if(message.hasText()){
+        if(callBack.getData() != null){
+            processCallBackUpdate(update);
+        } else if (callBack.getData() == null && message.hasText()) {
             processTextMessage(update);
-        } else if (message.hasSticker()) {
+        } else if (callBack.getData() == null && message.hasSticker()) {
             processStickerMessage(update);
-        }else {
+        } else if (callBack.getData()==null && message.hasReplyMarkup()) {
+            processCallBackUpdate(update);
+        } else {
             setUnsupportedMessageTypeView(update);
         }
+//        if(message.hasText()){
+//            processTextMessage(update);
+//        } else if (message.hasSticker()) {
+//            processStickerMessage(update);
+//        } else {
+//            setUnsupportedMessageTypeView(update);
+//        }
     }
+
 
     private void setUnsupportedMessageTypeView(Update update) {
         var sendMessage = messageUtils.generateSendMessageWithText(update, "Я не поддерживаю этот тип сообщения!");
@@ -65,6 +79,9 @@ public class UpdateProcessor {
     public void setViewSticker(SendSticker sticker){
         telegramBot.sendAnswerStickerMessage(sticker);
     }
+    public void setViewInline(SendMessage message){
+        telegramBot.sendAnswerInlineMessage(message);
+    }
 
 
     private void processStickerMessage(Update update) {
@@ -73,5 +90,8 @@ public class UpdateProcessor {
 
     private void processTextMessage(Update update) {
         updateProducer.produce(TEXT_MESSAGE_UPDATE,update);
+    }
+    private void processCallBackUpdate(Update update) {
+        updateProducer.produce(CALLBACK_UPDATE,update);
     }
 }
