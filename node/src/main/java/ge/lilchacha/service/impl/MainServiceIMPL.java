@@ -12,12 +12,16 @@ import ge.lilchacha.entity.AppUser;
 import ge.lilchacha.entity.enums.UserView;
 import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+
+import java.util.List;
 
 import static ge.lilchacha.entity.enums.UserView.HOME_MENU_VIEW;
 import static ge.lilchacha.service.enums.CallBackAnswers.*;
@@ -51,53 +55,37 @@ public class MainServiceIMPL implements MainService {
         saveRawData(update);
         var appUser = findOrSaveAppUser(update);
         SendMessage message = new SendMessage();
+        DeleteMessage deleteMessage = new DeleteMessage();
         var chatID = update.getMessage().getChatId();
         var text = update.getMessage().getText();
+
+        deleteMessage.setChatId(chatID);
+        deleteMessage.setMessageId(update.getMessage().getMessageId());
 
         //TODO интегрировать сервис по всасыванию текста
         var serviceCommand = fromValue(text);
         if(serviceCommand.equals(CANCEL)){
+            message.setText("Главное меню");
             message.setReplyMarkup(inlineCommandAssemblingService.homeMenuInlineBuilder(appUser));
-        }else {
+            List<BotApiMethod<?>> spisok = null;
+            spisok.add(deleteMessage);
+            spisok.add(message);
 
+            producerService.produceEditInlineAnswer(spisok);
+        }else if (serviceCommand.equals(START)){
+            message.setText("Главное меню");
+            message.setReplyMarkup(inlineCommandAssemblingService.homeMenuInlineBuilder(appUser));
+
+            message.setChatId(chatID);
+            sendAnswer(message);
         }
-
-        message.setChatId(chatID);
-        sendAnswer(message);
 
     }
 
 
-    private SendMessage processInlineAsk(AppUser appUser,Update update) {
-        SendMessage sendMessage = new SendMessage();
-        String data = update.getCallbackQuery().getData();
-        var value = fromValueCALL(data);
-        if(value.equals(MAIN_MENU)){
-            sendMessage.setText("Главное меню ( ◍•㉦•◍ )");
-            sendMessage.setReplyMarkup(inlineCommandAssemblingService.homeMenuInlineBuilder(appUser));
-        } else if (value.equals(HELP_MENU)) {
-            sendMessage.setText("Это страница помощи выбери что ты хочешь сделать");
-            sendMessage.setReplyMarkup(inlineCommandAssemblingService.helpInlineBuilder(appUser));
-        } else if (value.equals(ACTIVATION_MENU)) {
-            sendMessage.setText("Это страница активации пользователя нажми на кнопку ниже, чтобы активировать свой профиль");
-            sendMessage.setReplyMarkup(inlineCommandAssemblingService.activationInlineBuilder(appUser));
-        } else if (value.equals(PROFILE_MENU)) {
-            sendMessage.setText("Это твой профиль:");
-            sendMessage.setReplyMarkup(inlineCommandAssemblingService.profileInlineBuilder(appUser));
-        } else if (value.equals(GPT_MENU)) {
-            sendMessage.setText("Это страница отправки вопроса к чатгпт");
-            sendMessage.setReplyMarkup(inlineCommandAssemblingService.gptInlineBuilder(appUser));
-        } else if (value.equals(GDZ_MENU)) {
-            sendMessage.setText("Это страница запроса гдз");
-            sendMessage.setReplyMarkup(inlineCommandAssemblingService.gdzInlineBuilder(appUser));
-        }else {
-            sendMessage.setText("ошибка нажмите /cancel");
-        }
-        return sendMessage;
-    }
 
     private AppUser findOrSaveAppUser(Update update) {
-        User telegramUser = null;
+        User telegramUser;
         if(update.hasCallbackQuery()){
             telegramUser = update.getCallbackQuery().getFrom();
         }else {
@@ -126,9 +114,6 @@ public class MainServiceIMPL implements MainService {
     private void sendAnswer(SendMessage message) {
         producerService.produceAnswer(message);
     }
-    private void sendInlineAnswer(SendMessage message) {
-        producerService.produceInlineAnswer(message);
-    }
     private void sendAnswerSticker(Update update) {
 
         InputFile sticker = new InputFile("CAACAgIAAxkBAAEBfIFlLVK9AYidDuUm6D9IcxejBqMuzAACgxAAAiOC6EsWw3lKDQVdHjAE");
@@ -145,7 +130,10 @@ public class MainServiceIMPL implements MainService {
         sendAnswerSticker(update);
     }
 
-
+    @Override
+    public void sendErrMessage(SendMessage message) {
+        producerService.produceAnswer(message);
+    }
 
 
     private void saveRawData(Update update) {

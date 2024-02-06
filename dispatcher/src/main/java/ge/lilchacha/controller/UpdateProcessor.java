@@ -6,6 +6,7 @@ import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import static ge.lilchacha.model.RabbitQueue.*;
@@ -79,8 +80,8 @@ public class UpdateProcessor {
     public void setViewSticker(SendSticker sticker){
         telegramBot.sendAnswerStickerMessage(sticker);
     }
-    public void setViewInline(SendMessage message){
-        telegramBot.sendAnswerInlineMessage(message);
+    public void setViewInline(DeleteMessage deleteMessage,SendMessage  message){
+        telegramBot.deleteAndSendAnswerMessage(deleteMessage, message);
     }
 
 

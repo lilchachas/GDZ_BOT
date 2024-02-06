@@ -4,8 +4,12 @@ import ge.lilchacha.controller.UpdateProcessor;
 import ge.lilchacha.service.AnswerService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+
+import java.util.List;
 
 import static ge.lilchacha.model.RabbitQueue.*;
 
@@ -31,7 +35,9 @@ public class AnswerServiceIMPL implements AnswerService {
 
     @Override
     @RabbitListener(queues = ANSWER_INLINE_MESSAGE)
-    public void consumeInline(SendMessage message) {
-        updateProcessor.setViewInline(message);
+    public void consumeInline(List<BotApiMethod<?>> spisok) {
+        DeleteMessage deleteMessage = (DeleteMessage) spisok.get(0);
+        SendMessage message = (SendMessage) spisok.get(1);
+        updateProcessor.setViewInline(deleteMessage ,message);
     }
 }

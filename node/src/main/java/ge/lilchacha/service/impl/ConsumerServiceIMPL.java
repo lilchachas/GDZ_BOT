@@ -1,6 +1,7 @@
 package ge.lilchacha.service.impl;
 
 import ge.lilchacha.service.ConsumerService;
+import ge.lilchacha.service.MainInlineService;
 import ge.lilchacha.service.MainService;
 import lombok.extern.log4j.Log4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -13,9 +14,11 @@ import static ge.lilchacha.model.RabbitQueue.*;
 @Log4j
 public class ConsumerServiceIMPL implements ConsumerService {
     private final MainService mainService;
+    private final MainInlineService mainInlineService;
 
-    public ConsumerServiceIMPL(MainService mainService) {
+    public ConsumerServiceIMPL(MainService mainService, MainInlineService mainInlineService) {
         this.mainService = mainService;
+        this.mainInlineService = mainInlineService;
     }
 
     @Override
@@ -36,7 +39,7 @@ public class ConsumerServiceIMPL implements ConsumerService {
     @RabbitListener(queues = CALLBACK_UPDATE)
     public void consumeCallBack(Update update) {
         log.debug("NODE: CALLBACK UPDATE RECEIVED");
-        mainService.processCallBack(update);
+        mainInlineService.processCallBack(update);
     }
 
 }

@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -60,6 +61,25 @@ public class TelegramBot extends TelegramWebhookBot {
     @Override
     public String getBotPath() {
         return "/update";
+    }
+
+    public void deleteAndSendAnswerMessage(DeleteMessage deleteMessage, SendMessage  message){
+        if(deleteMessage.getMessageId()!=null){
+            try{
+                execute(message);
+            }catch (TelegramApiException e){
+                log.error(e);
+            }
+            if(message!=null){
+                try{
+                    if(message!=null){
+                        execute(message);
+                    }
+                }catch (TelegramApiException e){
+                    log.error(e);
+                }
+            }
+        }
     }
 
     public void sendAnswerMessage(SendMessage message){
